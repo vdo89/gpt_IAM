@@ -88,7 +88,9 @@ vip_outside_allowlist := [valid_input[0], {
   ]
 }]
 
-messages(input_value) = {msg | validation.deny[msg] with input as input_value}
+messages(input_value) = {msg | validation.deny[err] with input as input_value; msg := err.msg}
+
+paths(input_value) = {path | validation.deny[err] with input as input_value; path := err.path}
 
 
 test_no_denials_for_valid_input {
@@ -104,9 +106,16 @@ test_l2vni_rule_triggers {
 
 
 test_duplicate_l3vni_denied {
+  msgs := messages(dbl_l3vni_case)
+  paths_for_case := paths(dbl_l3vni_case)
+
   some msg
-  msg := messages(dbl_l3vni_case)[_]
+  msg := msgs[_]
   contains(msg, "duplicate L3VNI")
+
+  some path
+  path := paths_for_case[_]
+  contains(path, "vrfs")
 }
 
 
