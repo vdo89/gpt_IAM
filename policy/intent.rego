@@ -10,6 +10,14 @@ vrf_entries := [{"file_index": i, "vrf_index": j, "vrf": vrf} |
 
 vrfs := [entry.vrf | entry := vrf_entries[_]]
 
+tenant_entries := [{"file_index": i, "tenant": file} |
+  some i
+  file := input[i]
+  file.tenant
+]
+
+tenants := [entry.tenant | entry := tenant_entries[_]]
+
 vrf_by_name := {entry.vrf.name: entry.vrf | entry := vrf_entries[_]}
 
 tenant_entries := [{"file_index": i, "tenant": file} |
@@ -19,45 +27,14 @@ tenant_entries := [{"file_index": i, "tenant": file} |
 ]
 
 allowable_vip_exports(vrf_name) = prefixes {
-  vrf := vrf_by_name[vrf_name]
+  some vrf
+  vrf := vrfs[_]
+  vrf.name == vrf_name
   prefixes := vrf.allowed_vip_exports
 }
 
 is_ipv4_32(prefix) {
-  parts := split(prefix, "/")
-  count(parts) == 2
-  parts[1] == "32"
-  octets := split(parts[0], ".")
-  count(octets) == 4
-  all_octets_numeric(octets)
-  not octet_out_of_range(octets)
-}
-
-all_octets_numeric(octets) {
-  not octet_not_numeric(octets)
-}
-
-octet_not_numeric(octets) {
-  some i
-  not re_match("^[0-9]+$", octets[i])
-}
-
-octet_out_of_range(octets) {
-  some i
-  octet := to_number(octets[i])
-  octet < 0
-} {
-  some i
-  octet := to_number(octets[i])
-  octet > 255
-}
-
-l3vni_collisions[l3vni] := entries {
-  entries := [entry |
-    entry := vrf_entries[_]
-    entry.vrf.l3vni == l3vni
-  ]
-  count(entries) > 1
+  re_match("^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/32$", prefix)
 }
 
 deny[error] {
@@ -71,13 +48,15 @@ deny[error] {
 }
 
 deny[error] {
-  some l3vni
-  entries := l3vni_collisions[l3vni]
-  entry := entries[_]
-  vrf_names := [vrf_entry.vrf.name | vrf_entry := entries[_]]
+  some i
+  some j
+  i < j
+  vrf_i := vrf_entries[i]
+  vrf_j := vrf_entries[j]
+  vrf_i.vrf.l3vni == vrf_j.vrf.l3vni
   error := {
-    "msg": sprintf("duplicate L3VNI %d across VRFs %s", [l3vni, concat(", ", vrf_names)]),
-    "path": sprintf("input[%d].vrfs[%d].l3vni", [entry.file_index, entry.vrf_index]),
+    "msg": sprintf("duplicate L3VNI %d in VRFs %s and %s", [vrf_i.vrf.l3vni, vrf_i.vrf.name, vrf_j.vrf.name]),
+    "path": sprintf("input[%d].vrfs[%d].l3vni", [vrf_j.file_index, vrf_j.vrf_index]),
   }
 }
 
@@ -96,7 +75,7 @@ deny[error] {
   tenant_entry := tenant_entries[_]
   some export_index
   export := tenant_entry.tenant.vip_exports[export_index]
-  not vrf_by_name[export.vrf]
+  not vrf_names[export.vrf]
   error := {
     "msg": sprintf("vip_export prefix %s references unknown VRF %s", [export.prefix, export.vrf]),
     "path": sprintf("input[%d].vip_exports[%d].vrf", [tenant_entry.file_index, export_index]),
@@ -107,9 +86,8 @@ deny[error] {
   tenant_entry := tenant_entries[_]
   some export_index
   export := tenant_entry.tenant.vip_exports[export_index]
-  vrf_by_name[export.vrf]
   allowed := allowable_vip_exports(export.vrf)
-  not allowed[_] == export.prefix
+  not export.prefix == allowed[_]
   error := {
     "msg": sprintf("vip_export %s not permitted for VRF %s", [export.prefix, export.vrf]),
     "path": sprintf("input[%d].vip_exports[%d].prefix", [tenant_entry.file_index, export_index]),
