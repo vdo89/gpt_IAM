@@ -15,18 +15,22 @@ The GitLab CI pipeline has been mirrored into GitHub Actions with additional val
 Workflow: `.github/workflows/ci.yml`
 
 Stages:
-1. **Lint**: installs Ansible + linting tools, runs `yamllint` and `ansible-lint`, and optionally executes `conftest` when a `policy/` directory is present.
-2. **Render**: runs `ansible-playbook ... --check --diff` twice to prove idempotence and uploads the logs as artifacts.
-3. **Validate intent**: lightweight schema validation for `intent/vrfs.yml`, with a JSON summary uploaded as an artifact.
+1. **Lint**: installs pinned tooling from `requirements-dev.txt`, runs `yamllint` and `ansible-lint`, enforces Rego policies with `conftest test --combine intent/`, and publishes OPA coverage results as an artifact.
+2. **Render**: runs `ansible-playbook ... --check --diff` twice to prove idempotence and uploads the logs as artifacts with 30-day retention.
+3. **Validate intent**: JSON Schema (draft 2020-12) validation for `intent/vrfs.yml` and `intent/tenants/*.yml`, with a detailed JSON summary uploaded as an artifact.
 4. **Deploy**: manual-only (`workflow_dispatch`) run of the playbook to produce a deployment log artifact.
 
 ## Local quickstart
 The repository uses local Ansible connections to avoid network dependencies while developing. A representative workflow is:
 
 ```bash
-python -m pip install ansible yamllint ansible-lint pyyaml jinja2
+python -m pip install --upgrade pip
+pip install --requirement requirements-dev.txt
 ansible-lint ansible/site.yml
 yamllint .
+python scripts/validate_intent.py
+conftest test intent/ --policy policy --combine
+opa test policy
 ansible-playbook -i ansible/inventory.yml ansible/site.yml --check --diff
 ```
 
