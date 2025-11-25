@@ -9,5 +9,8 @@ rt_l3: 65000:51000
 racks:
   - leafpair1
 lb_vip: 10.42.200.42/32
+vip_exports:
+  - vrf: TENANT-042
+    prefix: 10.42.200.42/32
 notes: |
   Symmetric IRB Anycast gateway for tenant 42. L2VNI scoped to leafpair1 with ingress replication.

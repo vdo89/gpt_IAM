@@ -1,16 +1,29 @@
 vrfs:
   - name: VRF-PLATFORM
     l3vni: 50000
-    import_rt: 65000:50000
-    export_rt: 65000:50000
+    rd: 65000:50000
+    rt_import:
+      - 65000:50000
+    rt_export:
+      - 65000:50000
+    allowed_vip_exports: []
     description: Platform management and tooling
   - name: TENANT-042
     l3vni: 51000
-    import_rt: 65000:51000
-    export_rt: 65000:51000
+    rd: 65000:51000
+    rt_import:
+      - 65000:51000
+    rt_export:
+      - 65000:51000
+    allowed_vip_exports:
+      - 10.42.200.42/32
     description: Tenant 42 workloads with Anycast-IRB gateway 10.42.24.1
   - name: VRF-STORAGE
     l3vni: 52000
-    import_rt: 65000:52000
-    export_rt: 65000:52000
+    rd: 65000:52000
+    rt_import:
+      - 65000:52000
+    rt_export:
+      - 65000:52000
+    allowed_vip_exports: []
     description: Storage back-end network for Ceph simulation
