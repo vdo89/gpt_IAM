@@ -1,5 +1,6 @@
 tenant: TENANT-042
 vlan: 242
+l2vni_base: 11000
 subnet: 10.42.24.0/24
 gateway: 10.42.24.1/24
 l2vni: 11242

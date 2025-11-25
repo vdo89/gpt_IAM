@@ -3,6 +3,7 @@
   "$id": "https://example.org/schemas/intent.schema.json",
   "title": "EVPN intent payload",
   "type": "array",
+  "minItems": 1,
   "items": {
     "oneOf": [
       { "$ref": "https://example.org/schemas/vrf.schema.json" },

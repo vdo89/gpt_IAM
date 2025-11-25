@@ -6,6 +6,7 @@
   "required": [
     "tenant",
     "vlan",
+    "l2vni_base",
     "subnet",
     "gateway",
     "l2vni",
@@ -20,6 +21,11 @@
       "type": "string",
       "pattern": "^(VRF-)?(TENANT-[A-Z0-9_-]+)$"
     },
+    "l2vni_base": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 16777215
+    },
     "vlan": {
       "type": "integer",
       "minimum": 1,
@@ -27,11 +33,17 @@
     },
     "subnet": {
       "type": "string",
-      "pattern": "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/[0-9]{1,2}$"
+      "oneOf": [
+        { "pattern": "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/[0-9]{1,2}$" },
+        { "pattern": "^[0-9a-fA-F:]+/[0-9]{1,3}$" }
+      ]
     },
     "gateway": {
       "type": "string",
-      "pattern": "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/[0-9]{1,2}$"
+      "oneOf": [
+        { "pattern": "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/[0-9]{1,2}$" },
+        { "pattern": "^[0-9a-fA-F:]+/[0-9]{1,3}$" }
+      ]
     },
     "l2vni": {
       "type": "integer",
@@ -54,12 +66,18 @@
     "racks": {
       "type": "array",
       "items": {
-        "type": "string"
-      }
+        "type": "string",
+        "pattern": "^[a-z0-9_-]+$"
+      },
+      "minItems": 1,
+      "uniqueItems": true
     },
     "lb_vip": {
       "type": "string",
-      "pattern": "^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/32$"
+      "oneOf": [
+        { "pattern": "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/32$" },
+        { "pattern": "^[0-9a-fA-F:]+/128$" }
+      ]
     },
     "vip_exports": {
       "type": "array",
@@ -72,12 +90,16 @@
           },
           "prefix": {
             "type": "string",
-            "pattern": "^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/32$"
+            "oneOf": [
+              { "pattern": "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/32$" },
+              { "pattern": "^[0-9a-fA-F:]+/128$" }
+            ]
           }
         },
         "additionalProperties": false
       },
-      "uniqueItems": true
+      "uniqueItems": true,
+      "minItems": 0
     },
     "notes": {
       "type": "string"

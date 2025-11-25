@@ -1,0 +1,8 @@
+{
+  "strict": true,
+  "mobility_leaf_pairs": ["leafpair1", "leafpair2"],
+  "allowed_ceph_public_vips": [
+    "10.42.200.42/32",
+    "2001:db8:42::42/128"
+  ]
+}

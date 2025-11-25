@@ -1,5 +1,6 @@
 vrfs:
   - name: VRF-PLATFORM
+    zone: PLATFORM
     l3vni: 50000
     rd: 65000:50000
     rt_import:
@@ -9,6 +10,7 @@ vrfs:
     allowed_vip_exports: []
     description: Platform management and tooling
   - name: TENANT-042
+    zone: TENANT
     l3vni: 51000
     rd: 65000:51000
     rt_import:
@@ -19,6 +21,7 @@ vrfs:
       - 10.42.200.42/32
     description: Tenant 42 workloads with Anycast-IRB gateway 10.42.24.1
   - name: VRF-STORAGE
+    zone: STORAGE
     l3vni: 52000
     rd: 65000:52000
     rt_import:
