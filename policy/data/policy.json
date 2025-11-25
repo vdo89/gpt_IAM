@@ -1,0 +1,8 @@
+{
+  "strict": true,
+  "allowed_leafpairs": ["leafpair1", "leafpair2"],
+  "min_vlan": 100,
+  "max_vlan": 4094,
+  "l2vni_base": 11000,
+  "allowed_export_vrfs": ["VRF-STORAGE", "VRF-FIREWALL", "TENANT-042"]
+}

@@ -8,5 +8,6 @@
       { "$ref": "https://example.org/schemas/vrf.schema.json" },
       { "$ref": "https://example.org/schemas/tenant.schema.json" }
     ]
-  }
+  },
+  "unevaluatedItems": false
 }

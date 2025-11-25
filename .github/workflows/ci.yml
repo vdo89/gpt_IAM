@@ -54,6 +54,7 @@ jobs:
       - name: Run policy unit tests with coverage
         run: |
           mkdir -p artifacts
+          opa test policy --coverage --threshold 90
           opa test policy --coverage --format=json > artifacts/opa-coverage.json
 
       - name: Upload policy coverage

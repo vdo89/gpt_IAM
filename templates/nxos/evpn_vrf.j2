@@ -1,0 +1,13 @@
+router bgp {{ bgp_as }}
+  vrf {{ vrf.name }}
+    rd {{ vrf.rd }}
+    address-family ipv4 unicast
+{% for rt in vrf.rt_import %}      route-target import {{ rt }}
+{% endfor %}{% for rt in vrf.rt_export %}      route-target export {{ rt }}
+{% endfor %}
+!
+evpn
+  vni {{ vrf.l3vni }} l3
+{% for tenant in tenants %}vlan {{ tenant.vlan }}
+  vn-segment {{ tenant.l2vni }}
+{% endfor %}

@@ -3,6 +3,27 @@
   "$id": "https://example.org/schemas/tenant.schema.json",
   "title": "EVPN tenant intent",
   "type": "object",
+  "$defs": {
+    "ipv4_cidr": {
+      "type": "string",
+      "pattern": "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/(?:[0-9]|[1-2][0-9]|3[0-2])$"
+    },
+    "ipv6_cidr": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F:]+/(?:[0-9]|[1-9][0-9]|1[01][0-9]|12[0-8])$"
+    },
+    "host_prefix": {
+      "type": "string",
+      "oneOf": [
+        { "pattern": "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/32$" },
+        { "pattern": "^[0-9a-fA-F:]+/128$" }
+      ]
+    },
+    "route_target": {
+      "type": "string",
+      "pattern": "^[0-9]{1,5}:[0-9]{1,10}$"
+    }
+  },
   "required": [
     "tenant",
     "vlan",
@@ -27,11 +48,17 @@
     },
     "subnet": {
       "type": "string",
-      "pattern": "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/[0-9]{1,2}$"
+      "oneOf": [
+        { "$ref": "#/$defs/ipv4_cidr" },
+        { "$ref": "#/$defs/ipv6_cidr" }
+      ]
     },
     "gateway": {
       "type": "string",
-      "pattern": "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/[0-9]{1,2}$"
+      "oneOf": [
+        { "$ref": "#/$defs/ipv4_cidr" },
+        { "$ref": "#/$defs/ipv6_cidr" }
+      ]
     },
     "l2vni": {
       "type": "integer",
@@ -44,22 +71,21 @@
       "maximum": 16777215
     },
     "rt_l2": {
-      "type": "string",
-      "pattern": "^[0-9]{1,5}:[0-9]{1,10}$"
+      "$ref": "#/$defs/route_target"
     },
     "rt_l3": {
-      "type": "string",
-      "pattern": "^[0-9]{1,5}:[0-9]{1,10}$"
+      "$ref": "#/$defs/route_target"
     },
     "racks": {
       "type": "array",
       "items": {
         "type": "string"
-      }
+      },
+      "uniqueItems": true,
+      "minItems": 1
     },
     "lb_vip": {
-      "type": "string",
-      "pattern": "^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/32$"
+      "$ref": "#/$defs/host_prefix"
     },
     "vip_exports": {
       "type": "array",
@@ -71,11 +97,11 @@
             "type": "string"
           },
           "prefix": {
-            "type": "string",
-            "pattern": "^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/32$"
+            "$ref": "#/$defs/host_prefix"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "unevaluatedProperties": false
       },
       "uniqueItems": true
     },
@@ -83,5 +109,6 @@
       "type": "string"
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "unevaluatedProperties": false
 }

@@ -1,6 +1,12 @@
 {
-  "VRF-PLATFORM": {},
+  "VRF-PLATFORM": {
+    "10.41.200.41/32": true
+  },
   "TENANT-042": {
     "10.42.200.42/32": true
-  }
+  },
+  "VRF-STORAGE": {
+    "10.43.200.43/32": true
+  },
+  "VRF-FIREWALL": {}
 }

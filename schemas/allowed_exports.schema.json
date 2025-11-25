@@ -6,10 +6,12 @@
   "additionalProperties": {
     "type": "object",
     "patternProperties": {
-      "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/32$": {
+      "^((?:[0-9]{1,3}\\.){3}[0-9]{1,3}/32|[0-9a-fA-F:]+/128)$": {
         "type": "boolean"
       }
     },
-    "additionalProperties": false
-  }
+    "additionalProperties": false,
+    "unevaluatedProperties": false
+  },
+  "unevaluatedProperties": false
 }
