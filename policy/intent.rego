@@ -90,17 +90,17 @@ deny[error] {
   }
 }
 
-deny[error] {
+vip_rule_violation[err] {
   tenant_entry := tenant_entries[_]
   export := tenant_entry.tenant.vip_exports[export_index]
   not vrf_names[export.vrf]
-  error := {
-    "msg": sprintf("vip_export prefix %s references unknown VRF %s", [export.prefix, export.vrf]),
-    "path": sprintf("input[%d].vip_exports[%d].vrf", [tenant_entry.file_index, export_index]),
-  }
+  err := violation_record(
+    sprintf("vip_export prefix %s references unknown VRF %s", [export.prefix, export.vrf]),
+    path_for(tenant_entry.file_index, ["vip_exports", export_index, "vrf"]),
+  )
 }
 
-deny[error] {
+vip_rule_violation[err] {
   tenant_entry := tenant_entries[_]
   export := tenant_entry.tenant.vip_exports[export_index]
   allowed := allowable_vip_exports(export.vrf)

@@ -18,7 +18,7 @@
   "properties": {
     "tenant": {
       "type": "string",
-      "pattern": "^(VRF-)?(TENANT-[A-Z0-9_-]+)$"
+      "pattern": "^(VRF-)?TENANT-[A-Z0-9-]+$"
     },
     "vlan": {
       "type": "integer",
@@ -27,16 +27,17 @@
     },
     "subnet": {
       "type": "string",
-      "pattern": "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/[0-9]{1,2}$"
+      "pattern": "^(?:(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/[0-9]{1,2}|(?:[0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{1,4}/[0-9]{1,3})$"
     },
     "gateway": {
       "type": "string",
-      "pattern": "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/[0-9]{1,2}$"
+      "pattern": "^(?:(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/[0-9]{1,2}|(?:[0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{1,4}/[0-9]{1,3})$"
     },
     "l2vni": {
       "type": "integer",
       "minimum": 5000,
-      "maximum": 16777215
+      "maximum": 16777215,
+      "description": "Must equal data.policy.vni.base_l2vni + data.policy.vni.offset + vlan"
     },
     "l3vni": {
       "type": "integer",
@@ -59,7 +60,7 @@
     },
     "lb_vip": {
       "type": "string",
-      "pattern": "^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/32$"
+      "pattern": "^(?:(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/32|(?:[0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{1,4}/128)$"
     },
     "vip_exports": {
       "type": "array",
@@ -68,11 +69,12 @@
         "required": ["vrf", "prefix"],
         "properties": {
           "vrf": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^VRF-(PLATFORM|TENANT-[A-Z0-9-]+|DMZ|STORAGE)$"
           },
           "prefix": {
             "type": "string",
-            "pattern": "^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/32$"
+            "pattern": "^(?:(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/32|(?:[0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{1,4}/128)$"
           }
         },
         "additionalProperties": false

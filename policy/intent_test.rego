@@ -115,3 +115,38 @@ test_allowlist_enforced_from_data_overrides_input {
   some msg in msgs
   contains(msg, "not permitted for VRF")
 }
+
+test_strict_mode_requires_data_allowlist_when_missing {
+  tenant := object.put(tenant_valid, "vip_exports", [{"vrf": "VRF-TENANT-VALID", "prefix": "192.0.2.1/32"}])
+  msgs := messages([vrf_file, tenant], {}, policy_defaults)
+  some msg in msgs
+  contains(msg, "requires data-backed allowlist")
+}
+
+test_non_strict_mode_allows_input_allowlist {
+  tenant := object.put(tenant_valid, "vip_exports", [{"vrf": "VRF-TENANT-VALID", "prefix": "192.0.2.1/32"}])
+  msgs := messages([vrf_file, tenant], {}, policy_non_strict)
+  count(msgs) == 0
+}
+
+test_rt_sets_must_include_rd {
+  vrf_missing_rd := {
+    "vrfs": [{
+      "name": "VRF-TENANT-OOPS",
+      "l3vni": 7000,
+      "rd": "65000:7000",
+      "rt_import": ["65000:7001"],
+      "rt_export": ["65000:7002"],
+      "allowed_vip_exports": []
+    }]
+  }
+  msgs := messages_with_defaults([vrf_missing_rd], allowed_exports_fixture)
+  msg := msgs[_]
+  contains(msg, "must include its RD")
+}
+
+test_vni_formula_uses_policy_offset {
+  tenant := object.put(tenant_valid, "l2vni", 12001)
+  msgs := messages([vrf_file, tenant], allowed_exports_fixture, {"strict_allowlist": true, "vni": {"base_l2vni": 12000, "offset": 0}})
+  count(msgs) == 0
+}
