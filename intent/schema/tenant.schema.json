@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Tenant definition",
+  "type": "object",
+  "properties": {
+    "tenant": {"type": "string", "minLength": 1},
+    "vlan": {"type": "integer", "minimum": 1, "maximum": 4094},
+    "subnet": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+\\.\\d+/\\d+$"},
+    "gateway": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+\\.\\d+/\\d+$"},
+    "l2vni": {"type": "integer", "minimum": 10000, "maximum": 19999},
+    "l3vni": {"type": "integer", "minimum": 50000, "maximum": 59999},
+    "rt_l2": {"type": "string", "pattern": "^\\d+:\\d+$"},
+    "rt_l3": {"type": "string", "pattern": "^\\d+:\\d+$"},
+    "racks": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1
+    },
+    "lb_vip": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+\\.\\d+/32$"},
+    "notes": {"type": "string"}
+  },
+  "required": ["tenant", "vlan", "subnet", "gateway", "l2vni", "l3vni", "rt_l2", "rt_l3", "racks", "lb_vip"],
+  "additionalProperties": false
+}

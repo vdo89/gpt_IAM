@@ -27,6 +27,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install ansible ansible-lint yamllint jsonschema conftest jinja2
 
+      - name: Show Conftest version
+        run: conftest --version
+
       - name: Lint YAML
         run: yamllint .
 
@@ -69,6 +72,15 @@ jobs:
           ansible-playbook -i ansible/inventory.yml ansible/site.yml --check --diff \
             | tee artifacts/render-pass2.log
 
+      - name: Collect rendered configuration artifacts
+        run: |
+          mkdir -p artifacts/rendered
+          if [ -d /etc/ansible/rendered ]; then
+            cp /etc/ansible/rendered/* artifacts/rendered/
+          else
+            echo "No rendered configs found in /etc/ansible/rendered"
+          fi
+
       - name: Verify idempotence
         run: |
           python - <<'PY'
@@ -89,8 +101,8 @@ jobs:
       - name: Upload render artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: render-logs
-          path: artifacts/*.log
+          name: render-output
+          path: artifacts/
 
   validate_intent:
     needs: render
@@ -109,26 +121,48 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyyaml jsonschema
 
-      - name: Validate VRF schema
+      - name: Validate intent schemas
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          import yaml
+          from typing import Any, Dict, List
 
-          intent = yaml.safe_load(Path("intent/vrfs.yml").read_text())
-          vrfs = intent.get("vrfs", []) if intent else []
-          required = {"name", "l3vni", "import_rt", "export_rt"}
-          problems = []
-          for vrf in vrfs:
-            missing = sorted(required - set(vrf))
-            if missing:
-              problems.append({"vrf": vrf.get("name", "<unnamed>"), "missing": missing})
-          summary = {"count": len(vrfs), "missing_fields": problems}
+          import yaml
+          from jsonschema import Draft7Validator
+
+          def load_schema(name: str) -> Dict[str, Any]:
+            schema_path = Path("intent/schema") / name
+            return json.loads(schema_path.read_text())
+
+          def validate_objects(objects: List[Dict[str, Any]], schema: Dict[str, Any], label: str):
+            validator = Draft7Validator(schema)
+            issues = []
+            for obj in objects:
+              for error in validator.iter_errors(obj):
+                issues.append({"object": obj.get("name", obj.get("tenant", "<unnamed>")), "error": error.message})
+            return issues
+
+          vrf_intent = yaml.safe_load(Path("intent/vrfs.yml").read_text()) or {}
+          vrfs = vrf_intent.get("vrfs", [])
+          tenants = []
+          for path in Path("intent/tenants").glob("*.yml"):
+            tenants.append(yaml.safe_load(path.read_text()) or {})
+
+          vrf_issues = validate_objects(vrfs, load_schema("vrf.schema.json"), "vrf")
+          tenant_issues = validate_objects(tenants, load_schema("tenant.schema.json"), "tenant")
+
+          summary = {
+            "vrfs": {"count": len(vrfs), "issues": vrf_issues},
+            "tenants": {"count": len(tenants), "issues": tenant_issues},
+          }
+
           Path("artifacts").mkdir(exist_ok=True)
           Path("artifacts/intent-summary.json").write_text(json.dumps(summary, indent=2))
-          if problems:
-            raise SystemExit(f"VRF schema issues found: {problems}")
+
+          all_issues = vrf_issues + tenant_issues
+          if all_issues:
+            raise SystemExit(f"Intent schema validation failed: {all_issues}")
           print(json.dumps(summary, indent=2))
           PY
 

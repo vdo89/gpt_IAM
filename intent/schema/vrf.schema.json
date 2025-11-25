@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EVPN VRF",
+  "type": "object",
+  "properties": {
+    "name": {"type": "string", "minLength": 1},
+    "l3vni": {"type": "integer", "minimum": 50000, "maximum": 59999},
+    "import_rt": {"type": "string", "pattern": "^\\d+:\\d+$"},
+    "export_rt": {"type": "string", "pattern": "^\\d+:\\d+$"},
+    "description": {"type": "string"}
+  },
+  "required": ["name", "l3vni", "import_rt", "export_rt"],
+  "additionalProperties": false
+}

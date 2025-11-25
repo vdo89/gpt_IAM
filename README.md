@@ -15,9 +15,9 @@ The GitLab CI pipeline has been mirrored into GitHub Actions with additional val
 Workflow: `.github/workflows/ci.yml`
 
 Stages:
-1. **Lint**: installs Ansible + linting tools, runs `yamllint` and `ansible-lint`, and optionally executes `conftest` when a `policy/` directory is present.
-2. **Render**: runs `ansible-playbook ... --check --diff` twice to prove idempotence and uploads the logs as artifacts.
-3. **Validate intent**: lightweight schema validation for `intent/vrfs.yml`, with a JSON summary uploaded as an artifact.
+1. **Lint**: installs Ansible + linting tools, runs `yamllint` and `ansible-lint`, and executes `conftest` Rego policies in `policy/` to catch intent drift.
+2. **Render**: runs `ansible-playbook ... --check --diff` twice to prove idempotence, renders device configs under `/etc/ansible/rendered`, and uploads both logs and rendered configs as artifacts.
+3. **Validate intent**: JSON Schema validation for VRFs and tenants (`intent/schema/*.json`), with a JSON summary uploaded as an artifact.
 4. **Deploy**: manual-only (`workflow_dispatch`) run of the playbook to produce a deployment log artifact.
 
 ## Local quickstart
@@ -30,4 +30,4 @@ yamllint .
 ansible-playbook -i ansible/inventory.yml ansible/site.yml --check --diff
 ```
 
-If you prefer policy checks, add `policy/` with Conftest Rego rules and run `conftest test intent/`.
+If you prefer policy checks, populate `policy/` with Conftest Rego rules (an example is included) and run `conftest test intent/`.
