@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/allowed_exports.schema.json",
+  "title": "VIP export allowlists per VRF",
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "patternProperties": {
+      "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/32$": {
+        "type": "boolean"
+      }
+    },
+    "additionalProperties": false
+  }
+}
