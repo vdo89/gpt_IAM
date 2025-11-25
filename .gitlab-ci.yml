@@ -4,9 +4,27 @@ lint:
   image: python:3.11
   stage: lint
   script:
-    - pip install yamllint jsonschema conftest
+    - pip install --upgrade pip
+    - pip install --requirement requirements-dev.txt
+    - version="v0.52.0"
+    - curl -L "https://github.com/open-policy-agent/conftest/releases/download/${version}/conftest_${version#v}_Linux_x86_64.tar.gz" | tar xz
+    - install -m 0755 conftest /usr/local/bin/conftest
+    - version="v0.68.0"
+    - curl -L -o opa "https://openpolicyagent.org/downloads/${version}/opa_linux_amd64_static"
+    - install -m 0755 opa /usr/local/bin/opa
+    - python scripts/combine_intent.py
     - yamllint .
-    - conftest test intent/
+    - ansible-lint ansible/site.yml
+    - conftest test build/combined.json --policy policy --output table
+    - conftest verify --policy policy
+    - mkdir -p artifacts
+    - opa test policy --coverage --format=json > artifacts/opa-coverage.json
+    - python scripts/validate_intent.py
+  artifacts:
+    paths:
+      - artifacts/intent-validation.json
+      - artifacts/opa-coverage.json
+      - build/combined.json
 
 render:
   image: python:3.11
@@ -14,6 +32,7 @@ render:
   script:
     - pip install jinja2 ansible
     - ansible-playbook -i ansible/inventory.yml ansible/site.yml --check --diff
+    - mkdir -p artifacts
     - tar czf artifacts/configs.tgz /etc/ansible/rendered || true
   artifacts:
     paths: [ artifacts/configs.tgz ]

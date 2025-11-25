@@ -1,0 +1,6 @@
+artifacts/
+build/
+rendered/
+__pycache__/
+*.pyc
+.venv/

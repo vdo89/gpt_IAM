@@ -42,6 +42,9 @@ jobs:
           curl -L -o opa "https://openpolicyagent.org/downloads/${version}/opa_linux_amd64_static"
           install -m 0755 opa /usr/local/bin/opa
 
+      - name: Build combined intent payload
+        run: python scripts/combine_intent.py
+
       - name: Lint YAML
         run: yamllint .
 
@@ -49,12 +52,22 @@ jobs:
         run: ansible-lint ansible/site.yml
 
       - name: Validate intent contracts
-        run: conftest test intent/ --policy policy --combine
+        run: conftest test build/combined.json --policy policy --output table
+
+      - name: Run policy unit tests
+        run: conftest verify --policy policy
 
       - name: Run policy unit tests with coverage
         run: |
           mkdir -p artifacts
           opa test policy --coverage --format=json > artifacts/opa-coverage.json
+
+      - name: Upload combined intent payload
+        uses: actions/upload-artifact@v4
+        with:
+          name: combined-intent-${{ github.sha }}
+          path: build/combined.json
+          retention-days: 30
 
       - name: Upload policy coverage
         uses: actions/upload-artifact@v4
@@ -91,6 +104,15 @@ jobs:
           ansible-playbook -i ansible/inventory.yml ansible/site.yml --check --diff \
             | tee artifacts/render-pass2.log
 
+      - name: Archive rendered configuration
+        run: |
+          mkdir -p artifacts
+          if [ -d /etc/ansible/rendered ]; then
+            tar czf artifacts/rendered.tgz -C /etc/ansible rendered
+          else
+            echo "No rendered configs found"
+          fi
+
       - name: Verify idempotence
         run: |
           python - <<'PY'
@@ -112,7 +134,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: render-logs-${{ github.sha }}
-          path: artifacts/*.log
+          path: |
+            artifacts/*.log
+            artifacts/rendered.tgz
           retention-days: 30
 
   validate_intent:
@@ -139,7 +163,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: intent-validation-${{ github.sha }}
-          path: artifacts/intent-validation.json
+          path: |
+            artifacts/intent-validation.json
+            build/combined.json
           retention-days: 30
 
   deploy:

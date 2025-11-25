@@ -5,6 +5,7 @@
   "type": "object",
   "required": [
     "tenant",
+    "vrf",
     "vlan",
     "subnet",
     "gateway",
@@ -13,12 +14,17 @@
     "rt_l2",
     "rt_l3",
     "racks",
+    "lb_vip",
     "vip_exports"
   ],
   "properties": {
     "tenant": {
       "type": "string",
       "pattern": "^(VRF-)?(TENANT-[A-Z0-9_-]+)$"
+    },
+    "vrf": {
+      "type": "string",
+      "pattern": "^(VRF-)?(PLATFORM|TENANT-[A-Z0-9_-]+|DMZ|STORAGE)$"
     },
     "vlan": {
       "type": "integer",
@@ -31,7 +37,7 @@
     },
     "gateway": {
       "type": "string",
-      "pattern": "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/[0-9]{1,2}$"
+      "pattern": "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$"
     },
     "l2vni": {
       "type": "integer",
@@ -55,7 +61,8 @@
       "type": "array",
       "items": {
         "type": "string"
-      }
+      },
+      "uniqueItems": true
     },
     "lb_vip": {
       "type": "string",
@@ -83,5 +90,6 @@
       "type": "string"
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "unevaluatedProperties": false
 }

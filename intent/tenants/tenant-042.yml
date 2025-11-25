@@ -1,7 +1,8 @@
 tenant: TENANT-042
+vrf: TENANT-042
 vlan: 242
 subnet: 10.42.24.0/24
-gateway: 10.42.24.1/24
+gateway: 10.42.24.1
 l2vni: 11242
 l3vni: 51000
 rt_l2: 65000:11242
