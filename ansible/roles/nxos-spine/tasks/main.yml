@@ -1,3 +1,19 @@
+---
+- name: Validate spine intent variables
+  ansible.builtin.assert:
+    that:
+      - spines is defined
+      - spines[inventory_hostname] is defined
+      - spines[inventory_hostname].router_id is defined
+      - spines[inventory_hostname].lo is defined
+    fail_msg: "Spine variables missing for {{ inventory_hostname }}"
+  changed_when: false
+
+- name: Display EVPN policy toggle
+  ansible.builtin.debug:
+    msg: "Firewall cross-VRF only: {{ policy.only_firewall_cross_vrf | default('undefined') }}"
+  changed_when: false
+
 - name: Ensure rendered config directory exists
   ansible.builtin.file:
     path: /etc/ansible/rendered

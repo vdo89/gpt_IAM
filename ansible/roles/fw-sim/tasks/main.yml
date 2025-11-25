@@ -1,3 +1,18 @@
+---
+- name: Validate firewall neighbor intent
+  ansible.builtin.assert:
+    that:
+      - fw is defined
+      - fw.peers is defined
+      - fw.peers | length > 0
+    fail_msg: "Firewall peers missing for {{ inventory_hostname }}"
+  changed_when: false
+
+- name: Document configured VRF peers
+  ansible.builtin.debug:
+    msg: "VRF peers defined: {{ fw.peers.keys() | list | join(', ') }}"
+  changed_when: false
+
 - name: Ensure rendered config directory exists
   ansible.builtin.file:
     path: /etc/ansible/rendered
