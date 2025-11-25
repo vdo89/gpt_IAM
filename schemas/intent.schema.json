@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/intent.schema.json",
+  "title": "EVPN intent payload",
+  "type": "array",
+  "items": {
+    "oneOf": [
+      { "$ref": "https://example.org/schemas/vrf.schema.json" },
+      { "$ref": "https://example.org/schemas/tenant.schema.json" }
+    ]
+  }
+}
