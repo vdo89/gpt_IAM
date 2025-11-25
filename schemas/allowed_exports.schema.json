@@ -3,10 +3,17 @@
   "$id": "https://example.org/schemas/allowed_exports.schema.json",
   "title": "VIP export allowlists per VRF",
   "type": "object",
+  "propertyNames": {
+    "pattern": "^(VRF-)?(PLATFORM|TENANT-[A-Z0-9_-]+|DMZ|STORAGE)$"
+  },
   "additionalProperties": {
     "type": "object",
+    "minProperties": 0,
     "patternProperties": {
       "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}/32$": {
+        "type": "boolean"
+      },
+      "^[0-9a-fA-F:]+/128$": {
         "type": "boolean"
       }
     },
