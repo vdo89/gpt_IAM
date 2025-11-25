@@ -18,7 +18,13 @@ tenant_entries := [{"file_index": i, "tenant": file} |
 
 tenants := [entry.tenant | entry := tenant_entries[_]]
 
-vrf_names := {vrf.name | vrf := vrfs[_]}
+vrf_by_name := {entry.vrf.name: entry.vrf | entry := vrf_entries[_]}
+
+tenant_entries := [{"file_index": i, "tenant": file} |
+  some i
+  file := input[i]
+  file.tenant
+]
 
 allowable_vip_exports(vrf_name) = prefixes {
   some vrf
