@@ -1,3 +1,23 @@
+---
+- name: Validate load balancer intent
+  ansible.builtin.assert:
+    that:
+      - lb is defined
+      - lb.asn is defined
+      - lb.router_id is defined
+      - lb.vrf is defined
+    fail_msg: "Load balancer variables missing for {{ inventory_hostname }}"
+  changed_when: false
+
+- name: Summarize VIP advertisement
+  ansible.builtin.debug:
+    msg:
+      vip: "{{ lb.vip | default('undefined') }}"
+      vrf: "{{ lb.vrf }}"
+      peer: "{{ lb.leaf_peer | default('not set') }}"
+      peer_asn: "{{ lb.leaf_asn | default('not set') }}"
+  changed_when: false
+
 - name: Ensure rendered config directory exists
   ansible.builtin.file:
     path: /etc/ansible/rendered
