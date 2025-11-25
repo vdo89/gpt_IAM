@@ -1,0 +1,33 @@
+feature bgp
+feature nv overlay
+feature interface-vlan
+feature bfd
+nv overlay evpn
+
+hostname {{ inventory_hostname }}
+
+interface loopback0
+  ip address {{ spine.loopbacks.lo0 }}
+
+{% for link in underlay_links[inventory_hostname].uplinks %}
+interface {{ link.name }}
+  description Downlink-to-{{ link.peer }}
+  ip address {{ link.peer_ip }}
+{% endfor %}
+
+router bgp {{ fabric.asn_spines }}
+  router-id {{ spine.router_id }}
+  template peer LEAFS
+    bfd interval {{ fabric.bfd.min_tx }} min-rx {{ fabric.bfd.min_rx }} multiplier {{ fabric.bfd.mult }}
+    update-source loopback0
+    ebgp-multihop {{ fabric.ebgp_multihop }}
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+  address-family l2vpn evpn
+    retain route-target all
+{% for leaf_name in groups['leafs'] | default([]) %}
+  neighbor {{ hostvars[leaf_name].leaf.loopbacks.nve.split('/')[0] }} remote-as {{ hostvars[leaf_name].leaf.asn }}
+  neighbor {{ hostvars[leaf_name].leaf.loopbacks.nve.split('/')[0] }} inherit peer LEAFS
+  neighbor {{ hostvars[leaf_name].leaf.loopbacks.nve.split('/')[0] }} route-reflector-client
+{% endfor %}

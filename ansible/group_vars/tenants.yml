@@ -1,0 +1,43 @@
+tenants:
+  - name: VRF-PLATFORM
+    vlan: 241
+    subnet: 10.41.24.0/24
+    gateway: 10.41.24.1/24
+    l2vni: 11241
+    l3vni: 50000
+    rt_l2: "65000:11241"
+    rt_l3: "65000:50000"
+    racks: [ "leafpair1", "leafpair2" ]
+    lb_vip: 10.41.200.41/32
+    lb_peer: 172.20.0.41
+    lb_asn: 65241
+    fw_peer: 172.20.0.51
+    fw_asn: 65250
+  - name: TENANT-042
+    vlan: 242
+    subnet: 10.42.24.0/24
+    gateway: 10.42.24.1/24
+    l2vni: 11242
+    l3vni: 51000
+    rt_l2: "65000:11242"
+    rt_l3: "65000:51000"
+    racks: [ "leafpair1" ]
+    lb_vip: 10.42.200.42/32
+    lb_peer: 172.20.0.42
+    lb_asn: 65242
+    fw_peer: 172.20.0.52
+    fw_asn: 65250
+  - name: VRF-STORAGE
+    vlan: 243
+    subnet: 10.43.24.0/24
+    gateway: 10.43.24.1/24
+    l2vni: 11243
+    l3vni: 52000
+    rt_l2: "65000:11243"
+    rt_l3: "65000:52000"
+    racks: [ "leafpair2" ]
+    lb_vip: 10.43.200.43/32
+    lb_peer: 172.20.0.43
+    lb_asn: 65243
+    fw_peer: 172.20.0.53
+    fw_asn: 65250

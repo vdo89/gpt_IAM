@@ -1,0 +1,11 @@
+router bgp {{ lb.asn }}
+  bgp router-id {{ lb.router_id }}
+  timers bgp 1 3
+  neighbor {{ lb.leaf_peer }} remote-as {{ lb.leaf_asn }}
+  neighbor {{ lb.leaf_peer }} bfd
+  address-family ipv4 unicast
+    network {{ lb.vip }}/32
+    neighbor {{ lb.leaf_peer }} activate
+
+bfd
+  peer {{ lb.leaf_peer }} multihop

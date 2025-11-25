@@ -1,0 +1,13 @@
+tenant: TENANT-042
+vlan: 242
+subnet: 10.42.24.0/24
+gateway: 10.42.24.1/24
+l2vni: 11242
+l3vni: 51000
+rt_l2: 65000:11242
+rt_l3: 65000:51000
+racks:
+  - leafpair1
+lb_vip: 10.42.200.42/32
+notes: |
+  Symmetric IRB Anycast gateway for tenant 42. L2VNI scoped to leafpair1 with ingress replication.

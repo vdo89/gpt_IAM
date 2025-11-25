@@ -1,0 +1,15 @@
+- name: Ensure rendered config directory exists
+  ansible.builtin.file:
+    path: /etc/ansible/rendered
+    state: directory
+    mode: '0755'
+  check_mode: no
+  delegate_to: localhost
+
+- name: Render NX-OS spine configuration
+  ansible.builtin.template:
+    src: nxos_spine.j2
+    dest: "/etc/ansible/rendered/{{ inventory_hostname }}.cfg"
+    mode: '0644'
+  delegate_to: localhost
+  diff: yes

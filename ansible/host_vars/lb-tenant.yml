@@ -1,0 +1,7 @@
+lb:
+  asn: 65242
+  router_id: 10.42.200.42
+  vip: 10.42.200.42
+  vrf: TENANT-042
+  leaf_peer: 172.20.0.42
+  leaf_asn: 65101

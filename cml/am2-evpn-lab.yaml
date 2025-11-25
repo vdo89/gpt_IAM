@@ -1,0 +1,98 @@
+lab:
+  description: "EVPN/VXLAN – NX-OSv9k – AM2 test"
+  notes: "Spine-Leaf + FW + LB + Hosts"
+nodes:
+  - id: spine1
+    label: spine1
+    node_definition: nxosv9000
+    image: nxosv9000-9.3
+    ram: 8192
+    cpus: 4
+    interfaces: [ eth0, eth1, eth2, lo0 ]
+  - id: spine2
+    label: spine2
+    node_definition: nxosv9000
+    image: nxosv9000-9.3
+    ram: 8192
+    cpus: 4
+    interfaces: [ eth0, eth1, eth2, lo0 ]
+
+  - id: leaf1a
+    label: leaf1a
+    node_definition: nxosv9000
+    image: nxosv9000-9.3
+    ram: 8192
+    cpus: 4
+    interfaces: [ eth0, eth1, eth2, eth3, lo0 ]
+  - id: leaf1b
+    label: leaf1b
+    node_definition: nxosv9000
+    image: nxosv9000-9.3
+    ram: 8192
+    cpus: 4
+    interfaces: [ eth0, eth1, eth2, eth3, lo0 ]
+
+  - id: leaf2a
+    label: leaf2a
+    node_definition: nxosv9000
+    image: nxosv9000-9.3
+    ram: 8192
+    cpus: 4
+    interfaces: [ eth0, eth1, eth2, eth3, lo0 ]
+  - id: leaf2b
+    label: leaf2b
+    node_definition: nxosv9000
+    image: nxosv9000-9.3
+    ram: 8192
+    cpus: 4
+    interfaces: [ eth0, eth1, eth2, eth3, lo0 ]
+
+  - id: fw
+    label: fw
+    node_definition: ubuntu
+    image: ubuntu-22.04
+    interfaces: [ eth0, eth1, eth2, eth3, eth4 ]  # mgmt + vrf-legs
+
+  - id: lb-platform
+    label: lb-platform
+    node_definition: ubuntu
+    image: ubuntu-22.04
+    interfaces: [ eth0 ]  # in VRF-PLATFORM leg
+
+  - id: lb-tenant
+    label: lb-tenant
+    node_definition: ubuntu
+    image: ubuntu-22.04
+    interfaces: [ eth0 ]  # in VRF-TENANT leg
+
+  - id: host-t42a
+    label: host-t42a
+    node_definition: ubuntu
+    image: ubuntu-22.04
+    interfaces: [ eth0 ]  # VLAN 242 access
+
+  - id: host-t42b
+    label: host-t42b
+    node_definition: ubuntu
+    image: ubuntu-22.04
+    interfaces: [ eth0 ]  # VLAN 242 access
+
+links:
+  # Spines <-> Leafs
+  - endpoints: [ spine1:eth0, leaf1a:eth0 ]
+  - endpoints: [ spine1:eth1, leaf1b:eth0 ]
+  - endpoints: [ spine1:eth2, leaf2a:eth0 ]
+  - endpoints: [ spine2:eth0, leaf1a:eth1 ]
+  - endpoints: [ spine2:eth1, leaf1b:eth1 ]
+  - endpoints: [ spine2:eth2, leaf2a:eth1 ]
+  - endpoints: [ spine1:lo0,    leaf1a:lo0 ]  # mgmt/loopbacks via virbr, of configureer in device
+  # FW legs per VRF: verbind fw:eth1->leaf1a:eth2 (PLATFORM), fw:eth2->leaf1a:eth3 (TENANT), fw:eth3->leaf2a:eth2 (STORAGE)
+  - endpoints: [ fw:eth1, leaf1a:eth2 ]
+  - endpoints: [ fw:eth2, leaf1a:eth3 ]
+  - endpoints: [ fw:eth3, leaf2a:eth2 ]
+  # LB's naar hun VRF-leaf
+  - endpoints: [ lb-platform:eth0, leaf1a:eth4 ]
+  - endpoints: [ lb-tenant:eth0,   leaf1b:eth4 ]
+  # Hosts (tenant 42) access aan leaf1-pair
+  - endpoints: [ host-t42a:eth0, leaf1a:eth5 ]
+  - endpoints: [ host-t42b:eth0, leaf1b:eth5 ]

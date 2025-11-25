@@ -1,0 +1,11 @@
+leafpairs:
+  leafpair1:
+    leaves: [ leaf1a, leaf1b ]
+    asn: 65101
+    loopbacks:
+      nve: 10.255.1.11/32
+  leafpair2:
+    leaves: [ leaf2a, leaf2b ]
+    asn: 65102
+    loopbacks:
+      nve: 10.255.1.21/32

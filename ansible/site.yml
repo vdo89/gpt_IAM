@@ -1,0 +1,19 @@
+- hosts: spines
+  gather_facts: no
+  roles:
+    - nxos-spine
+
+- hosts: leafs
+  gather_facts: no
+  roles:
+    - nxos-leaf
+
+- hosts: fw
+  gather_facts: no
+  roles:
+    - fw-sim
+
+- hosts: lb
+  gather_facts: no
+  roles:
+    - frr-lb

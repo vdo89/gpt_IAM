@@ -1,0 +1,11 @@
+underlay_links:
+  spine1:
+    uplinks:
+      - { name: eth0, peer: leaf1a, peer_ip: 10.0.0.1/31, ip: 10.0.0.0/31 }
+      - { name: eth1, peer: leaf1b, peer_ip: 10.0.0.3/31, ip: 10.0.0.2/31 }
+      - { name: eth2, peer: leaf2a, peer_ip: 10.0.0.5/31, ip: 10.0.0.4/31 }
+  spine2:
+    uplinks:
+      - { name: eth0, peer: leaf1a, peer_ip: 10.0.0.9/31, ip: 10.0.0.8/31 }
+      - { name: eth1, peer: leaf1b, peer_ip: 10.0.0.11/31, ip: 10.0.0.10/31 }
+      - { name: eth2, peer: leaf2a, peer_ip: 10.0.0.13/31, ip: 10.0.0.12/31 }

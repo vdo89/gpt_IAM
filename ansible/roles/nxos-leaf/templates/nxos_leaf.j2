@@ -1,0 +1,125 @@
+feature bgp
+feature nv overlay
+feature interface-vlan
+feature bfd
+nv overlay evpn
+
+hostname {{ inventory_hostname }}
+
+interface loopback0
+  ip address {{ leaf.loopbacks.nve }}
+
+{% for link in leaf.uplinks | default([]) %}
+interface {{ link.name }}
+  description Uplink-to-{{ link.peer }}
+  ip address {{ link.ip }}
+{% endfor %}
+
+{% for link in leaf.access | default([]) %}
+interface {{ link.name }}
+  description {{ link.description }}
+  switchport
+  switchport mode access
+  switchport access vlan {{ link.vlan }}
+  spanning-tree port type edge
+{% endfor %}
+
+{% for link in leaf.lb_links | default([]) %}
+interface {{ link.name }}
+  description {{ link.description }}
+  no switchport
+{% endfor %}
+
+{% for link in leaf.fw_links | default([]) %}
+interface {{ link.name }}
+  description {{ link.description }}
+  no switchport
+{% endfor %}
+
+router bgp {{ leaf.asn }}
+  router-id {{ leaf.router_id }}
+  template peer EVPN
+    bfd interval {{ fabric.bfd.min_tx }} min-rx {{ fabric.bfd.min_rx }} multiplier {{ fabric.bfd.mult }}
+    update-source loopback0
+    ebgp-multihop {{ fabric.ebgp_multihop }}
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+  neighbor {{ spines.spine1.lo }} remote-as {{ fabric.asn_spines }}
+  neighbor {{ spines.spine1.lo }} inherit peer EVPN
+  neighbor {{ spines.spine2.lo }} remote-as {{ fabric.asn_spines }}
+  neighbor {{ spines.spine2.lo }} inherit peer EVPN
+
+interface nve1
+  no shutdown
+  source-interface loopback0
+  host-reachability protocol bgp
+
+{% for t in tenants %}
+{% set eligible = False %}
+{% for rack in t.racks %}
+{% if inventory_hostname in leafpair_members[rack] %}{% set eligible = True %}{% endif %}
+{% endfor %}
+{% if eligible %}
+vrf context {{ t.name }}
+  rd auto
+  address-family ipv4 unicast
+    route-target import {{ t.rt_l3 }}
+    route-target export {{ t.rt_l3 }}
+
+interface Vlan{{ t.vlan }}
+  vrf member {{ t.name }}
+  no shutdown
+  ip address virtual {{ t.gateway }}
+  fabric forwarding mode anycast-gateway
+
+evpn
+  vni {{ t.l2vni }} l2
+    rd auto
+    route-target import {{ t.rt_l2 }}
+    route-target export {{ t.rt_l2 }}
+
+interface nve1
+  member vni {{ t.l2vni }}
+    ingress-replication
+  member vni {{ t.l3vni }} associate-vrf
+
+router bgp {{ leaf.asn }}
+  vrf {{ t.name }}
+    address-family ipv4 unicast
+      maximum-paths 4
+    neighbor {{ t.lb_peer }} remote-as {{ t.lb_asn }}
+    neighbor {{ t.lb_peer }} bfd
+    address-family ipv4 unicast
+      route-map RM-{{ t.name }}-LB-IN in
+      route-map RM-{{ t.name }}-LB-OUT out
+    neighbor {{ t.fw_peer }} remote-as {{ t.fw_asn }}
+    neighbor {{ t.fw_peer }} bfd
+    address-family ipv4 unicast
+      route-map RM-{{ t.name }}-FW-IN in
+      route-map RM-{{ t.name }}-FW-OUT out
+{% endif %}
+{% endfor %}
+
+{% for t in tenants %}
+{% set eligible = False %}
+{% for rack in t.racks %}
+{% if inventory_hostname in leafpair_members[rack] %}{% set eligible = True %}{% endif %}
+{% endfor %}
+{% if eligible %}
+ip prefix-list VIPS-{{ t.name }} seq 10 permit {{ t.lb_vip }}
+
+route-map RM-{{ t.name }}-LB-OUT permit 10
+  match ip address prefix-list VIPS-{{ t.name }}
+route-map RM-{{ t.name }}-LB-OUT deny 100
+
+route-map RM-{{ t.name }}-FW-OUT permit 10
+  match ip address prefix-list VIPS-{{ t.name }}
+route-map RM-{{ t.name }}-FW-OUT deny 100
+
+route-map RM-{{ t.name }}-LB-IN permit 10
+  match ip address prefix-list DEFAULT-OR-BACKENDS
+route-map RM-{{ t.name }}-FW-IN permit 10
+  match ip address prefix-list DEFAULT-ONLY
+{% endif %}
+{% endfor %}
