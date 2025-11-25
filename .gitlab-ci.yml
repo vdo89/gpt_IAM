@@ -1,0 +1,35 @@
+stages: [lint, render, validate, deploy]
+
+lint:
+  image: python:3.11
+  stage: lint
+  script:
+    - pip install yamllint jsonschema conftest
+    - yamllint .
+    - conftest test intent/
+
+render:
+  image: python:3.11
+  stage: render
+  script:
+    - pip install jinja2 ansible
+    - ansible-playbook -i ansible/inventory.yml ansible/site.yml --check --diff
+    - tar czf artifacts/configs.tgz /etc/ansible/rendered || true
+  artifacts:
+    paths: [ artifacts/configs.tgz ]
+
+validate:
+  image: batfish/allinone:latest
+  stage: validate
+  script:
+    - tar xzf artifacts/configs.tgz -C tests/batfish/configs
+    - pybatfish_do_some_checks.sh
+  dependencies: [render]
+
+deploy:
+  image: networktocode/ansible:latest
+  stage: deploy
+  when: manual
+  script:
+    - ansible-playbook -i ansible/inventory.yml ansible/site.yml
+  dependencies: [render]

@@ -1,0 +1,5 @@
+spine:
+  asn: 65000
+  router_id: 10.255.0.12
+  loopbacks:
+    lo0: 10.255.0.12/32

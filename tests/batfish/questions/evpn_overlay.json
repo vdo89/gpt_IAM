@@ -1,0 +1,7 @@
+{
+  "class": "org.batfish.question.routes.RoutesQuestion",
+  "nodes": "/.*/",
+  "vrfRegex": ".*",
+  "protocols": ["bgp"],
+  "type": "evpn"
+}

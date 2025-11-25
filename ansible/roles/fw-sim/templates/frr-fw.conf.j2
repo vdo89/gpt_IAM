@@ -1,0 +1,16 @@
+router bgp {{ fw.asn }}
+  bgp router-id {{ fw.router_id }}
+{% for vrf_name, session in fw.peers.items() %}
+  address-family ipv4 unicast vrf {{ vrf_name }}
+    neighbor {{ session.neighbor }} remote-as {{ session.remote_as }}
+    neighbor {{ session.neighbor }} bfd
+{% if session.allow_default %}
+    network 0.0.0.0/0
+{% endif %}
+    neighbor {{ session.neighbor }} activate
+{% endfor %}
+
+bfd
+{% for vrf_name, session in fw.peers.items() %}
+  peer {{ session.neighbor }} multihop
+{% endfor %}

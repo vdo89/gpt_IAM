@@ -1,0 +1,10 @@
+leaf:
+  asn: 65102
+  router_id: 10.255.0.31
+  loopbacks:
+    nve: 10.255.1.21/32
+  uplinks:
+    - { name: eth0, ip: 10.0.0.5/31, peer: spine1, peer_ip: 10.0.0.4/31 }
+    - { name: eth1, ip: 10.0.0.13/31, peer: spine2, peer_ip: 10.0.0.12/31 }
+  fw_links:
+    - { name: eth2, description: "FW STORAGE" }

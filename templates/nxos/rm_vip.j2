@@ -1,0 +1,14 @@
+ip prefix-list VIPS-{{ t.name }} seq 10 permit {{ t.lb_vip }}
+
+route-map RM-{{ t.name }}-LB-OUT permit 10
+  match ip address prefix-list VIPS-{{ t.name }}
+route-map RM-{{ t.name }}-LB-OUT deny 100
+
+route-map RM-{{ t.name }}-FW-OUT permit 10
+  match ip address prefix-list VIPS-{{ t.name }}
+route-map RM-{{ t.name }}-FW-OUT deny 100
+
+route-map RM-{{ t.name }}-LB-IN permit 10
+  match ip address prefix-list DEFAULT-OR-BACKENDS
+route-map RM-{{ t.name }}-FW-IN permit 10
+  match ip address prefix-list DEFAULT-ONLY

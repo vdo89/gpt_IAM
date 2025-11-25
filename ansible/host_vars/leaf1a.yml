@@ -1,0 +1,15 @@
+leaf:
+  asn: 65101
+  router_id: 10.255.0.21
+  loopbacks:
+    nve: 10.255.1.11/32
+  uplinks:
+    - { name: eth0, ip: 10.0.0.1/31, peer: spine1, peer_ip: 10.0.0.0/31 }
+    - { name: eth1, ip: 10.0.0.9/31, peer: spine2, peer_ip: 10.0.0.8/31 }
+  access:
+    - { name: eth5, vlan: 242, description: "Host t42a" }
+  lb_links:
+    - { name: eth4, description: "LB platform" }
+  fw_links:
+    - { name: eth2, description: "FW PLATFORM" }
+    - { name: eth3, description: "FW TENANT" }

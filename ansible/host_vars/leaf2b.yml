@@ -1,0 +1,6 @@
+leaf:
+  asn: 65102
+  router_id: 10.255.0.32
+  loopbacks:
+    nve: 10.255.1.21/32
+  uplinks: []

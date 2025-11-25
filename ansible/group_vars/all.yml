@@ -1,0 +1,27 @@
+fabric:
+  asn_spines: 65000
+  ebgp_multihop: 3
+  bfd:
+    min_rx: 300
+    min_tx: 300
+    mult: 3
+evpn:
+  l3vni:
+    platform: 50000
+    tenant: 51000
+    storage: 52000
+  rt_base: 65000
+  l2vni_base: 11000
+policy:
+  only_firewall_cross_vrf: true
+  export_only_vips: true
+spines:
+  spine1:
+    lo: 10.255.0.11
+    router_id: 10.255.0.11
+  spine2:
+    lo: 10.255.0.12
+    router_id: 10.255.0.12
+leafpair_members:
+  leafpair1: [ leaf1a, leaf1b ]
+  leafpair2: [ leaf2a, leaf2b ]

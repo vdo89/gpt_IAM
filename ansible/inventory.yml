@@ -1,0 +1,21 @@
+all:
+  vars:
+    ansible_connection: local
+  children:
+    spines:
+      hosts:
+        spine1: { ansible_host: 172.20.0.11 }
+        spine2: { ansible_host: 172.20.0.12 }
+    leafs:
+      hosts:
+        leaf1a: { ansible_host: 172.20.0.21, leafpair: leafpair1 }
+        leaf1b: { ansible_host: 172.20.0.22, leafpair: leafpair1 }
+        leaf2a: { ansible_host: 172.20.0.31, leafpair: leafpair2 }
+        leaf2b: { ansible_host: 172.20.0.32, leafpair: leafpair2 }
+    lb:
+      hosts:
+        lb-platform: { ansible_host: 172.20.0.41 }
+        lb-tenant:   { ansible_host: 172.20.0.42 }
+    fw:
+      hosts:
+        fw: { ansible_host: 172.20.0.51 }
